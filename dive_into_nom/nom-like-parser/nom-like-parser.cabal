@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: fd4e298056d86f4d54cf89d019c4d211fa9e67119eef7825c1684e6f24ced65e
+-- hash: f3ed0ca08b873ff343022f0a740680738d64275804da2f870f17b67bd03234db
 
 name:           nom-like-parser
 version:        0.1.0.0
@@ -44,7 +44,7 @@ executable nom-like-parser-exe
       Paths_nom_like_parser
   hs-source-dirs:
       app
-  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N -XLambdaCase
   build-depends:
       base >=4.7 && <5
     , nom-like-parser
