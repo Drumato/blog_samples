@@ -6,7 +6,7 @@ main :: IO ()
 main = Tasty.defaultMain tests
 
 tests :: Tasty.TestTree
-tests = Tasty.testGroup "Parser Tests" [characterTests, tagTests]
+tests = Tasty.testGroup "Parser Tests" [characterTests, tagTests, satisfyTests]
 
 characterTests :: Tasty.TestTree
 characterTests =
@@ -29,4 +29,15 @@ tagTests =
         HUnit.assertEqual "" (Left P.Tag) (P.tag "Drum" "drumato"),
       HUnit.testCase "empty input" $
         HUnit.assertEqual "" (Left P.Tag) (P.tag "a" "")
+    ]
+satisfyTests :: Tasty.TestTree
+satisfyTests =
+  Tasty.testGroup
+    "satisfy Tests"
+    [ HUnit.testCase "simple satisfy" $
+        HUnit.assertEqual "" (Right ("rum", 'D')) (P.satisfy (=='D') "Drum"),
+      HUnit.testCase "not matching" $
+        HUnit.assertEqual "" (Left P.Satisfy) (P.satisfy (=='d') "Drumato"),
+      HUnit.testCase "empty input" $
+        HUnit.assertEqual "" (Left P.Satisfy) (P.satisfy (\c -> c == c) "")
     ]
