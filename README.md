@@ -6,7 +6,7 @@
 
 [こちらの記事](https://drumato.hatenablog.com/entry/dive-into-nom)で用いたサンプルコード．  
 
-## toy-hmts
+## toy-type-system
 
-Hindley/Milner Type system in Rust.  
-
+型システムのプロトタイプをRustで実装.  
+

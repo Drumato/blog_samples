@@ -1,10 +1,5 @@
-# toy type system
+# Toy Type System
 
-## monomorphism
+## mincaml-inferer
 
-単相型推論システムの実装  
-
-## polymorphism
-
-多相型推論システムの実装  
-
+MinCamlコンパイラで使用されている単相型推論アルゴリズムの実装.  
