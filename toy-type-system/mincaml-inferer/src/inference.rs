@@ -1,7 +1,10 @@
-use std::{collections::HashMap, ops::RangeInclusive};
+use std::ops::RangeInclusive;
 use thiserror::Error;
 
-use crate::{expr::Expr, types::Type};
+use crate::{
+    expr::Expr,
+    types::{Env, Type},
+};
 
 #[derive(Debug, Error)]
 pub enum InferenceError {
@@ -24,14 +27,14 @@ pub fn main(e: Expr) -> Result<Type, InferenceError> {
 /// 型推論の本体
 /// envは関数の束縛変数のみならず，型変数に割り当てられた実際の型も格納するので注意．
 fn infer(
-    mut env: HashMap<String, Type>,
+    mut env: Env,
     mut iter: RangeInclusive<char>,
     e: Expr,
-) -> Result<(HashMap<String, Type>, RangeInclusive<char>, Type), InferenceError> {
+) -> Result<(Env, RangeInclusive<char>, Type), InferenceError> {
     match e {
         Expr::Boolean(_b) => Ok((env, iter, Type::Boolean)),
         Expr::Integer(_v) => Ok((env, iter, Type::Integer)),
-        Expr::Variable(name) => match env.get(&name) {
+        Expr::Variable(name) => match env.vars_in_fn.get(&name) {
             Some(var_ty) => Ok((env.clone(), iter, var_ty.clone())),
             None => Err(InferenceError::NotFoundSuchAVariable {
                 v: name.to_string(),
@@ -39,13 +42,13 @@ fn infer(
         },
         Expr::Let(x, e1, e2) => {
             let (mut env, iter, e1_t) = infer(env, iter, *e1)?;
-            env.insert(x, e1_t);
+            env.vars_in_fn.insert(x, e1_t);
             infer(env, iter, *e2)
         }
         Expr::Lambda(var, expr) => {
             let new_type_var = iter.next().unwrap().to_string();
             let new_type_var = Type::Variable(new_type_var);
-            env.insert(var.to_string(), new_type_var.clone());
+            env.vars_in_fn.insert(var.to_string(), new_type_var.clone());
 
             let (env, iter, expr_ty) = infer(env, iter, *expr)?;
             Ok((
@@ -65,7 +68,7 @@ fn infer(
                 fn_ty,
                 Type::Fn(Box::new(param_ty.clone()), Box::new(new_type_var)),
             )?;
-            if let Some(resolved_ty) = env.get(&new_type_var_name) {
+            if let Some(resolved_ty) = env.type_vars.get(&new_type_var_name) {
                 return Ok((env.clone(), iter, resolved_ty.clone()));
             }
 
@@ -78,11 +81,11 @@ fn infer(
             let env = unify(env, Type::Integer, rhs_ty.clone())?;
 
             if let (Type::Variable(var), _) = (&lhs_ty, &rhs_ty) {
-                let resolved_ty = env.get(var).unwrap().clone();
+                let resolved_ty = env.type_vars.get(var).unwrap().clone();
                 return Ok((env, iter, resolved_ty));
             }
             if let (_, Type::Variable(var)) = (&lhs_ty, &rhs_ty) {
-                let resolved_ty = env.get(var).unwrap().clone();
+                let resolved_ty = env.type_vars.get(var).unwrap().clone();
                 return Ok((env, iter, resolved_ty));
             }
             Ok((env, iter, lhs_ty))
@@ -91,11 +94,7 @@ fn infer(
 }
 
 /// 型の比較，単一化
-fn unify(
-    mut env: HashMap<String, Type>,
-    t1: Type,
-    t2: Type,
-) -> Result<HashMap<String, Type>, InferenceError> {
+fn unify(mut env: Env, t1: Type, t2: Type) -> Result<Env, InferenceError> {
     match (t1.clone(), t2.clone()) {
         // シンプルな比較
         (Type::Integer, Type::Integer) | (Type::Boolean, Type::Boolean) => Ok(env),
@@ -108,7 +107,7 @@ fn unify(
         // 一方が型変数の場合を調べる
         (Type::Variable(var), _) => {
             // 定義済み(割り当て済み)の場合，単純比較
-            if let Some(var_t) = env.get(&var) {
+            if let Some(var_t) = env.vars_in_fn.get(&var) {
                 return unify(env.clone(), var_t.clone(), t2);
             }
 
@@ -117,18 +116,18 @@ fn unify(
                 return Err(InferenceError::FoundOccurrence);
             }
 
-            env.insert(var.to_string(), t2);
+            env.vars_in_fn.insert(var.to_string(), t2);
             Ok(env)
         }
         (_, Type::Variable(var)) => {
-            if let Some(var_t) = env.get(&var) {
+            if let Some(var_t) = env.type_vars.get(&var) {
                 return unify(env.clone(), var_t.clone(), t1);
             }
             if occur(&var, &t1) {
                 return Err(InferenceError::FoundOccurrence);
             }
 
-            env.insert(var.to_string(), t1);
+            env.type_vars.insert(var.to_string(), t1);
             Ok(env)
         }
         _ => Err(InferenceError::CannotUnify),
@@ -196,12 +195,12 @@ mod inference_tests {
         let x = Expr::Variable("x".to_string());
         let y = Expr::Variable("y".to_string());
         let let_expr = Expr::Let("y".to_string(), Box::new(x.clone()), Box::new(y));
-        let let_expr = Expr::Let("x".to_string(), Box::new(Expr::Integer(3)), Box::new(let_expr));
-        let result = infer(
-            env,
-            iter,
-            let_expr,
+        let let_expr = Expr::Let(
+            "x".to_string(),
+            Box::new(Expr::Integer(3)),
+            Box::new(let_expr),
         );
+        let result = infer(env, iter, let_expr);
         assert!(result.is_ok());
 
         let (_env, _iter, t) = result.unwrap();
