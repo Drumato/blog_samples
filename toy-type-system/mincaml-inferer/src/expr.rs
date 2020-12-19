@@ -1,6 +1,6 @@
 #[allow(dead_code)]
 #[derive(Debug, Clone)]
-pub enum Expr<'a> {
+pub enum Expr {
     /// `x`
     Variable(String),
     /// `42`
@@ -8,13 +8,11 @@ pub enum Expr<'a> {
     /// `true` | `false`
     Boolean(bool),
     /// `x + 3`
-    Plus(ExprRef<'a>, ExprRef<'a>),
+    Plus(Box<Expr>, Box<Expr>),
     /// `\x -> x + 3`
-    Lambda(String, ExprRef<'a>),
+    Lambda(String, Box<Expr>),
     /// `f 3`
-    Application(ExprRef<'a>, ExprRef<'a>),
+    Application(Box<Expr>, Box<Expr>),
     /// `let x = 3 in x + 3`
-    Let(String, ExprRef<'a>, ExprRef<'a>),
+    Let(String, Box<Expr>, Box<Expr>),
 }
-
-pub type ExprRef<'a> = &'a Expr<'a>;

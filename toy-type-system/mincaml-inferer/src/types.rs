@@ -1,9 +1,7 @@
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord)]
-pub enum Type<'a> {
+pub enum Type {
     Boolean,
     Integer,
-    Fn(TypeRef<'a>, TypeRef<'a>),
+    Fn(Box<Type>, Box<Type>),
     Variable(String),
 }
-
-pub type TypeRef<'a> = &'a Type<'a>;
