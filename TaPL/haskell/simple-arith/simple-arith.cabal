@@ -1,0 +1,65 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 96fdede756d3f3d790e87b9e0d12f0af1405c458442c0db4fa96e781686ce16f
+
+name:           simple-arith
+version:        0.1.0.0
+description:    Please see the README on GitHub at <https://github.com/githubuser/simple-arith#readme>
+homepage:       https://github.com/githubuser/simple-arith#readme
+bug-reports:    https://github.com/githubuser/simple-arith/issues
+author:         Author name here
+maintainer:     example@example.com
+copyright:      2021 Author name here
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+extra-source-files:
+    README.md
+    ChangeLog.md
+
+source-repository head
+  type: git
+  location: https://github.com/githubuser/simple-arith
+
+library
+  exposed-modules:
+      Eval
+      Syntax
+  other-modules:
+      Paths_simple_arith
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+  default-language: Haskell2010
+
+executable simple-arith-exe
+  main-is: Main.hs
+  other-modules:
+      Paths_simple_arith
+  hs-source-dirs:
+      app
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , simple-arith
+  default-language: Haskell2010
+
+test-suite simple-arith-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_simple_arith
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , simple-arith
+    , tasty
+    , tasty-hunit
+  default-language: Haskell2010
