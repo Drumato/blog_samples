@@ -1,0 +1,47 @@
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: "0.0.0.0:55678"
+processors:
+  attributes/all:
+    actions:
+      - key: "value-insert"
+        action: insert
+        value: "fixed-value"
+      - key: "value-update"
+        action: update
+        value: "updated-tracer-value"
+      - key: "value-upsert1"
+        action: upsert
+        value: "fixed-upsert-value"
+      - key: "value-upsert2"
+        action: upsert
+        value: "fixed-upsert-value"
+      - pattern: "delete-pattern.*"
+        action: delete
+      - key: "destination"
+        action: update
+        from_attribute: "from-attribute-1"
+      - key: "destination"
+        pattern: "^(?P<destination_from>.*)-attribute-1"
+        action: extract
+
+  batch:
+    send_batch_size: 1
+    send_batch_max_size: 1
+
+exporters:
+  debug:
+  otlp:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/all, batch]
+      exporters: [debug, otlp]
+
