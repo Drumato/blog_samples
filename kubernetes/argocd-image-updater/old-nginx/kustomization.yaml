@@ -1,0 +1,3 @@
+resources:
+- old-deployment.yaml
+- old-service.yaml
