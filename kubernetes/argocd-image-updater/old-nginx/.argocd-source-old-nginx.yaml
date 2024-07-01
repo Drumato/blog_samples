@@ -1,0 +1,3 @@
+kustomize:
+  images:
+  - nginx:1.27.0
