@@ -20,11 +20,11 @@ function install_argocd_image_updater() {
 }
 
 function install_old_nginx() {
-  kubectl apply -f nginx/old-deployment.yaml
-  kubectl apply -f nginx/old-service.yaml
+  kubectl apply -f old-nginx/old-deployment.yaml
+  kubectl apply -f old-nginx/old-service.yaml
 }
 
 # create_cluster
-install_argocd
-install_argocd_image_updater
+# install_argocd
+# install_argocd_image_updater
 install_old_nginx
