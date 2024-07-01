@@ -3,4 +3,4 @@ resources:
 - old-service.yaml
 images:
 - name: nginx
-  newTag: "1.27"
+  newTag: 1.27.0
