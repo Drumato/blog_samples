@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: proxysql
+  labels:
+    app: proxysql
+spec:
+  serviceName: "proxysql"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: proxysql
+  template:
+    metadata:
+      labels:
+        app: proxysql
+    spec:
+      containers:
+      - name: proxysql
+        command: 
+          - proxysql
+          - -f
+          - --idle-threads
+          - -D
+          - /var/lib/proxysql
+          - --config
+          - /etc/proxysql.cfg
+        image: proxysql/proxysql:latest
+        ports:
+        - containerPort: 6033
+          name: mysql
+        - containerPort: 6032
+          name: admin
+        volumeMounts:
+        - name: proxysql-config
+          mountPath: /etc/proxysql.cfg
+          subPath: proxysql.cfg
+        readinessProbe:
+          exec:
+            command:
+            - /bin/sh
+            - -c
+            - mysql -h 127.0.0.1 -P 6033 -uuser -ppassword -e "SELECT 1"
+          initialDelaySeconds: 10
+          periodSeconds: 10
+      volumes:
+      - name: proxysql-config
+        configMap:
+          name: proxysql-config
+  

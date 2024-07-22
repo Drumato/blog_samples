@@ -1,0 +1,77 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: proxysql-config
+  labels:
+    app: proxysql
+data:
+  proxysql.cfg: |
+    datadir="/var/lib/proxysql"
+    admin_variables=
+    {
+      admin_credentials="admin:admin_creds"
+      mysql_ifaces="0.0.0.0:6032"
+    }
+    mysql_variables=
+    {
+      threads=4
+      max_connections=2048
+      default_query_delay=0
+      default_query_timeout=36000000
+      poll_timeout=2000
+      interfaces="0.0.0.0:6033"
+      default_schema="information_schema"
+      stacksize=1048576
+      server_version="5.7.30"
+      connect_retries_on_failure=10
+      monitor_history=60000
+      monitor_connect_interval=200000
+      monitor_ping_interval=200000
+      ping_interval_server_msec=120000
+      ping_interval_server_max_failures=3
+      commands_stats=true
+      sessions_sort=true
+    }
+    mysql_servers=
+    (
+      {
+        address="mysql-service"
+        port=3306
+        hostgroup=0
+        max_connections=100
+      }
+    )
+    mysql_users=
+    (
+      {
+        username = "user"
+        password = "password"
+        default_hostgroup = 0
+
+        active = 1
+        max_connections = 10000
+
+      }
+    )
+    proxysql_servers=
+    (
+      {
+        hostname="proxysql-0"
+        port=6032
+        weight=1
+        comment="proxysql0"
+      },
+      {
+        hostname="proxysql-1"
+        port=6032
+        weight=1
+        comment="proxysql1"
+      },
+      {
+        hostname="proxysql-2"
+        port=6032
+        weight=1
+        comment="proxysql2"
+      }
+    )
+
