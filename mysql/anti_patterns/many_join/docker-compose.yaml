@@ -1,0 +1,15 @@
+version: '3.8'
+
+services:
+  mysql:
+    network_mode: "host"
+    image: mysql:8.0
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword   
+      MYSQL_DATABASE: testdb              
+      MYSQL_USER: testuser                
+      MYSQL_PASSWORD: testpassword        
+    volumes:
+      - ./initdb:/docker-entrypoint-initdb.d 
+    restart: unless-stopped
