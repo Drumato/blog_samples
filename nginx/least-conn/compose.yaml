@@ -1,0 +1,119 @@
+services:
+  backend1:
+    hostname: backend1
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "9101:8080"
+    networks:
+      - appnet
+
+  backend2:
+    hostname: backend2
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "9102:8080"
+    networks:
+      - appnet
+
+  backend3:
+    hostname: backend3
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    ports:
+      - "9103:8080"
+    networks:
+      - appnet
+
+  nginx1:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8081:80"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - appnet
+
+  nginx2:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8082:80"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - appnet
+
+  nginx3:
+    image: nginx:latest
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8083:80"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+    networks:
+      - appnet
+
+  nginx_exporter1:
+    image: nginx/nginx-prometheus-exporter:latest
+    command: -nginx.scrape-uri="http://nginx1:80/stub_status"
+    ports:
+      - "9111:9113"
+    depends_on:
+      - nginx1
+    networks:
+      - appnet
+
+  nginx_exporter2:
+    image: nginx/nginx-prometheus-exporter:latest
+    command: -nginx.scrape-uri="http://nginx2:80/stub_status"
+    ports:
+      - "9112:9113"
+    depends_on:
+      - nginx2
+    networks:
+      - appnet
+
+  nginx_exporter3:
+    image: nginx/nginx-prometheus-exporter:latest
+    command: -nginx.scrape-uri="http://nginx3:80/stub_status"
+    ports:
+      - "9113:9113"
+    depends_on:
+      - nginx3
+    networks:
+      - appnet
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - backend1
+      - backend2
+      - backend3
+      - nginx_exporter1
+      - nginx_exporter2
+      - nginx_exporter3
+    networks:
+      - appnet
+
+networks:
+  appnet:
+
